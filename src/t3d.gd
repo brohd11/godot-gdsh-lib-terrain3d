@@ -4,12 +4,15 @@ extends RefCounted
 ## Terrain3D classes are only touched through ClassDB/dynamic calls, so these scripts compile in
 ## projects without the addon; commands check available() and report it.
 
-## gdsh_lib/level's src/ (this package depends on it). The one place to edit if gdsh_lib/level moves.
-const LEVEL_SRC := "res://addons/_lib/gdsh_lib/level/src/"
+## gdsh_lib/level's src/: level sits beside this package wherever both are installed
+## (addons/_lib/gdsh_lib/, ~/.gdsh/packages/, ...). This file is <terrain3d>/src/t3d.gd.
+static func level_src() -> String:
+	var pkg := ProjectSettings.localize_path(new().get_script().resource_path).get_base_dir().get_base_dir()
+	return pkg.get_base_dir().path_join("level").path_join("src")
 
 
 static func level(file: String):
-	return ResourceLoader.load(LEVEL_SRC.path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
+	return ResourceLoader.load(level_src().path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
 
 
 static func available() -> bool:

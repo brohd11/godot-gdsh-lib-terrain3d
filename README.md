@@ -4,6 +4,8 @@
 `gdsh_lib/level`** (node paths, and its ground contract) and the Terrain3D addon (1.1.x). The scripts compile
 without Terrain3D (they use only ClassDB and dynamic calls), and commands report when it is missing.
 
+Install: see [Command packages](https://github.com/brohd11/godot-gdsh/blob/main/_export_ignore/docs/packages.md) in the gdsh repo. Install `level` beside it.
+
 ```
 terrain3d import HEIGHT_FILE [--sidecar=*_heightmap.json] [--scene=] [--data-dir=] ...
 terrain3d texture --albedo= --normal= [--height= --height-channel=] [--roughness= --roughness-channel=]
@@ -28,7 +30,5 @@ terrain3d info [x,z ...]
 
 ## Layout
 - `src/`: `terrain3d_core.gd` (import), `cli.gd`, `texture_pack.gd`, `flatten.gd`, `terrain3d_ground.gd`, and `t3d.gd`
-  (Terrain3D lookups, plus `LEVEL_SRC`, the one path to update if gdsh_lib/level moves).
+  (Terrain3D lookups, plus `level()`, which loads gdsh_lib/level's `src/` from the sibling `level` folder).
 - `cmd/`: command root (`manifest.gd`, plus the `terrain3d/` namespace with its subcommands). Thin commands.
-
-See gdsh_lib/level's README for the interim `commandDirs` registration (absolute paths).
