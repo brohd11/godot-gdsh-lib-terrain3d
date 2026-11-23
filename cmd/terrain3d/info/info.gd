@@ -49,5 +49,15 @@ func _execute(ctx:Context):
 				continue
 			var x := float(p[0])
 			var z := float(p[1])
-			ctx.append_output("  height(%s, %s) = %.3f" % [x, z, d.get_height(Vector3(x, 0, z))])
+			var pos := Vector3(x, 0, z)
+			var h: float = d.get_height(pos)
+			if is_nan(h):
+				ctx.append_output("  height(%s, %s) = nan  (outside regions)" % [x, z])
+				continue
+			var c: Color = d.get_color(pos)
+			ctx.append_output("  height(%s, %s) = %.3f  base=%d overlay=%d blend=%.2f angle=%s scale=%s%s%s%s  color=#%s wetness=%.2f" % [
+				x, z, h, d.get_control_base_id(pos), d.get_control_overlay_id(pos), d.get_control_blend(pos),
+				d.get_control_angle(pos), d.get_control_scale(pos),
+				" hole" if d.get_control_hole(pos) else "", " nav" if d.get_control_navigation(pos) else "",
+				" auto" if d.get_control_auto(pos) else "", c.to_html(false), d.get_roughness(pos)])
 	return ExitCode.OK

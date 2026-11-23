@@ -36,3 +36,50 @@ static func find_terrain(root: Node, node_path := "") -> Node:
 ## Terrain height at world x,z, NAN outside regions.
 static func height_at(terrain: Node, x: float, z: float) -> float:
 	return terrain.data.get_height(Vector3(x, 0, z))
+
+
+## The edited scene's Terrain3D, or an error String for the command to report.
+static func edited_terrain():
+	if not available():
+		return NOT_AVAILABLE
+	var root: Node = level("node_paths.gd").scene_root()
+	if root == null:
+		return "no scene open"
+	var t := find_terrain(root)
+	if t == null:
+		return "no Terrain3D in " + root.scene_file_path
+	if t.data == null:
+		return "Terrain3D has no data (set its data_directory)"
+	return t
+
+
+## The editor's undo manager, or null outside the editor.
+static func undo_redo():
+	if not Engine.is_editor_hint():
+		return null
+	var ei = Engine.get_singleton(&"EditorInterface")
+	return ei.get_editor_undo_redo() if ei else null
+
+
+## Terrain data saves with the scene (like the editor's tools): mark it unsaved, or save now.
+static func finish_edit(terrain: Node, save := false) -> String:
+	if save:
+		terrain.data.save_directory(terrain.data_directory)
+		return "saved " + terrain.data_directory
+	if Engine.is_editor_hint():
+		var ei = Engine.get_singleton(&"EditorInterface")
+		if ei:
+			ei.mark_scene_as_unsaved()
+	return ""
+
+
+## Saves terrain.assets to its own file, or marks the scene unsaved when the assets are built in.
+## Returns "" or an error.
+static func save_assets(terrain: Node) -> String:
+	var assets = terrain.assets
+	var path: String = assets.resource_path
+	if path == "" or path.contains("::"):
+		finish_edit(terrain)
+		return ""
+	var e := ResourceSaver.save(assets, path)
+	return "" if e == OK else "could not save %s (%s)" % [path, error_string(e)]

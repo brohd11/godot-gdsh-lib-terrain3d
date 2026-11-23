@@ -3,7 +3,9 @@ extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## Logic lives in ../../src (plain GDScript); requires gdsh_lib/level and the Terrain3D addon.
 
 const _HELP = \
-"Terrain3D tools: heightmap import (incl. unreal_to_godot sidecars), textures, flatten, info, compare.
+"Terrain3D tools: sculpt, paint, roads, regions, instancer and MultiMesh conversion, mesh assets, heightmap import.
+Brush commands drive Terrain3D's own editor brushes; all terrain edits are undoable and save with the scene.
+Points are world x,z or x,y,z (args or stdin), or --path=<Path3D>.
 Ground provider for level tools: res://addons/_lib/gdsh_lib/terrain3d/src/terrain3d_ground.gd
 Usage: terrain3d <subcommand>"
 

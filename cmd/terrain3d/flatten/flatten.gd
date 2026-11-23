@@ -3,14 +3,16 @@ extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 
 const _HELP = \
 "Flatten a circular pad in the Terrain3D: full strength inside --radius, smooth blend across --falloff.
-Saves the terrain data. Not undoable (re-import or re-run to change).
-Usage: terrain3d flatten --center=x,z [--radius=10] [--falloff=8] [--height=H]
+Exact pad shape (vs terrain3d sculpt flatten, which uses the editor's brush). Undoable; saves with
+the scene (or now with --save).
+Usage: terrain3d flatten --center=x,z [--radius=10] [--falloff=8] [--height=H] [--save]
   --height  pad height (default: the terrain height at the center)"
 
 var center_flag := ""
 var radius_flag := 10.0
 var falloff_flag := 8.0
 var height_flag := ""
+var save_flag := false
 
 
 static func get_command_name() -> String:
@@ -27,6 +29,7 @@ func _get_flags() -> Dictionary:
 	o.add_option("--radius=", {&"help": "full-strength radius, m"})
 	o.add_option("--falloff=", {&"help": "blend width beyond the radius, m"})
 	o.add_option("--height=", {&"help": "pad height (default: terrain height at center)"})
+	o.add_option("--save", {&"help": "write terrain data now"})
 	return o.get_options()
 
 
@@ -50,9 +53,11 @@ func _execute(ctx:Context):
 	if c == null:
 		ctx.append_error("--center=x,z is required")
 		return ExitCode.ERR
-	var res: Dictionary = _src("flatten.gd").flatten(terrain, c, radius_flag, falloff_flag, float(height_flag) if height_flag != "" else NAN)
+	var res: Dictionary = _src("flatten.gd").flatten(terrain, c, radius_flag, falloff_flag, float(height_flag) if height_flag != "" else NAN, save_flag)
 	if not res.ok:
 		ctx.append_error(res.message)
 		return ExitCode.ERR
+	if not save_flag:
+		T.finish_edit(terrain)
 	ctx.append_output(res.message)
 	return ExitCode.OK
