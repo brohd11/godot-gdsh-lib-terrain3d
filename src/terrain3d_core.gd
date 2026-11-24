@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
-## Terrain3D heightmap import, shared by the `terrain3d import` gdsh command (MCP / Editor
-## Console) and the headless CLI (cli.gd). No gdsh or editor dependency.
+## Terrain3D heightmap import, behind the `terrain3d import` gdsh command (Editor Console, MCP
+## and the headless gdsh CLI). No gdsh or editor dependency.
 ##
 ## Plain import: a height image (EXR/R16/PNG) placed at a position with offset/scale, like
 ## Terrain3D's own importer. With a `sidecar` (unreal_to_godot `*_heightmap.json`) the image

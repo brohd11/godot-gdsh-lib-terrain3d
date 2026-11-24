@@ -46,8 +46,8 @@ terrain3d import HEIGHT_FILE [--sidecar=*_heightmap.json] [--scene=] [--data-dir
   grid, baking the UE Landscape actor's rotation, origin and spacing into the heights.
 - `texture` follows the source normal's `.import` `normal_map_invert_y` for green flipping. unreal_to_godot
   PNGs stay DirectX on disk.
-- Headless import, with the same flags:
-  `godot --headless --path . --script res://addons/_lib/gdsh_lib/terrain3d/src/cli.gd -- HEIGHT_FILE --scene=res://x.tscn [...]`
+- Headless import through the gdsh CLI, with the same flags (`--scene=` is required there):
+  `gdsh 'terrain3d import HEIGHT_FILE --scene=res://x.tscn [...]'`
 
 ## Ground for gdsh_lib/level
 - With Terrain3D `collision_mode` set to an editor mode (`FULL_EDITOR`/`DYNAMIC_EDITOR`), level tools land
@@ -59,6 +59,6 @@ terrain3d import HEIGHT_FILE [--sidecar=*_heightmap.json] [--scene=] [--data-dir
 ## Layout
 - `src/`: `brush.gd` (Terrain3DEditor driver), `snapshot.gd` (region undo), `points.gd`, `regions.gd`,
   `instances.gd` (instancer data, JSON, MMI), `instance_brush.gd`, `mesh_assets.gd`, `flatten.gd`,
-  `terrain3d_core.gd` (import), `cli.gd`, `texture_pack.gd`, `terrain3d_ground.gd`, and `t3d.gd`
-  (Terrain3D lookups, plus `level()`, which loads gdsh_lib/level's `src/` from the sibling `level` folder).
+  `terrain3d_core.gd` (import), `texture_pack.gd`, `terrain3d_ground.gd`, `t3d.gd` (Terrain3D lookups)
+  and `paths.gd` (finds this package, and gdsh_lib/level's `src/` in the sibling `level` folder).
 - `cmd/`: command root (`manifest.gd`, plus the `terrain3d/` namespace with its subcommands). Thin commands.

@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d sculpt`: Terrain3D's sculpt brushes (raise, lower, smooth, flatten, slope) at points or along a path.
 
+const Pkg = preload("../../../src/paths.gd")
+
 const _HELP = \
 "Sculpt the edited scene's Terrain3D with its own editor brushes: a dab at one point, a stroke
 through several (sampled every size*0.2 m). One undo entry per command; saves with the scene.
@@ -60,14 +62,8 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
@@ -76,9 +72,9 @@ func _execute(ctx:Context):
 	if not _MODES.has(mode):
 		ctx.append_error("unknown mode '%s' (raise, lower, smooth, flatten, slope)" % mode)
 		return ExitCode.ERR
-	var B = _src("brush.gd")
+	var B = Pkg.src("brush.gd")
 	var errs := PackedStringArray()
-	var pts: PackedVector3Array = _src("points.gd").gather(positional_args.slice(1), ctx.stdin, path_flag, T.level("node_paths.gd"), errs, path_step_flag)
+	var pts: PackedVector3Array = Pkg.src("points.gd").gather(positional_args.slice(1), ctx.stdin, path_flag, Pkg.level("node_paths.gd"), errs, path_step_flag)
 	if not errs.is_empty() or pts.is_empty():
 		for e in errs: ctx.append_error(e)
 		if pts.is_empty(): ctx.append_error("no points (args, stdin, or --path)")

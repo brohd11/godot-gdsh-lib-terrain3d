@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances to-mmi`: convert Terrain3D instances into MultiMeshInstance3D nodes.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Build MultiMeshInstance3D nodes from the edited scene's Terrain3D instances: one per mesh asset,
 or one per --chunk m square (for culling). Mesh is the asset's LOD0; colors, shadow mode, layers and
@@ -35,19 +37,13 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var NP = T.level("node_paths.gd")
+	var NP = Pkg.level("node_paths.gd")
 	var root: Node = NP.scene_root()
 	var parent: Node = NP.resolve(parent_flag) if parent_flag != "" else root
 	if parent == null:
@@ -61,7 +57,7 @@ func _execute(ctx:Context):
 			return ExitCode.ERR
 		rect = Rect2(Vector2(float(a[0]), float(a[1])), Vector2.ZERO).expand(Vector2(float(a[2]), float(a[3])))
 	var to_local := (parent as Node3D).global_transform.affine_inverse() if parent is Node3D else Transform3D.IDENTITY
-	var I = _src("instances.gd")
+	var I = Pkg.src("instances.gd")
 	var res: Dictionary = I.to_mmis(terrain, mesh_flag, chunk_flag, rect, to_local)
 	for e in res.errors: ctx.append_error(e)
 	if res.nodes.is_empty():

@@ -2,6 +2,8 @@ extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d compare`: how closely the Terrain3D matches reference ground meshes (e.g. the
 ## unreal_to_godot landscape components), by sampling their vertices.
 
+const Pkg = preload("../../../src/paths.gd")
+
 const _HELP = \
 "Compare the edited scene's Terrain3D against the meshes under each stdin node (e.g. an exported
 landscape): samples mesh vertices in world space and reports terrain height error.
@@ -26,17 +28,12 @@ func _get_flags() -> Dictionary:
 
 
 
-## This package's src/ (cmd/terrain3d/<cmd>/<cmd>.gd -> package root), loaded fresh so edits apply.
-func _src(file: String):
-	var pkg := ProjectSettings.localize_path(get_script().resource_path).get_base_dir().get_base_dir().get_base_dir().get_base_dir()
-	return ResourceLoader.load(pkg.path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	if not T.available():
 		ctx.append_error(T.NOT_AVAILABLE)
 		return ExitCode.ERR
-	var NP = T.level("node_paths.gd")
+	var NP = Pkg.level("node_paths.gd")
 	var errs := PackedStringArray()
 	var nodes: Array = NP.nodes_from_lines(ctx.stdin, errs)
 	for e in errs: ctx.append_error(e)

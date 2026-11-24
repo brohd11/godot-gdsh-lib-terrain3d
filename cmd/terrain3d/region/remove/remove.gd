@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d region remove`: remove regions at world points, grid locations, or over an area.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Remove regions (and their height, texture and instance data) with the Terrain3D region tool.
 Missing regions are skipped. One undo entry; saves with the scene.
@@ -29,19 +31,13 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var R = _src("regions.gd")
+	var R = Pkg.src("regions.gd")
 	var errs := PackedStringArray()
 	var locs: Array = R.locations(terrain, positional_args, ctx.stdin, grid_flag, area_flag, errs)
 	for e in errs: ctx.append_error(e)

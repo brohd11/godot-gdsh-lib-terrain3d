@@ -1,19 +1,10 @@
 @tool
 extends RefCounted
-## Terrain3D lookups shared by the terrain3d commands, and the link to gdsh_lib/level.
+## Terrain3D lookups shared by the terrain3d commands (paths, and the link to level, are in paths.gd).
 ## Terrain3D classes are only touched through ClassDB/dynamic calls, so these scripts compile in
 ## projects without the addon; commands check available() and report it.
 
-## gdsh_lib/level's src/: level sits beside this package wherever both are installed
-## (addons/_lib/gdsh_lib/, ~/.gdsh/packages/, ...). This file is <terrain3d>/src/t3d.gd.
-static func level_src() -> String:
-	var pkg := ProjectSettings.localize_path(new().get_script().resource_path).get_base_dir().get_base_dir()
-	return pkg.get_base_dir().path_join("level").path_join("src")
-
-
-static func level(file: String):
-	return ResourceLoader.load(level_src().path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
+const Pkg = preload("paths.gd")
 
 static func available() -> bool:
 	return ClassDB.class_exists(&"Terrain3D")
@@ -42,7 +33,7 @@ static func height_at(terrain: Node, x: float, z: float) -> float:
 static func edited_terrain():
 	if not available():
 		return NOT_AVAILABLE
-	var root: Node = level("node_paths.gd").scene_root()
+	var root: Node = Pkg.level("node_paths.gd").scene_root()
 	if root == null:
 		return "no scene open"
 	var t := find_terrain(root)

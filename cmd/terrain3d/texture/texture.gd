@@ -2,6 +2,8 @@ extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d texture`: pack source PBR textures into Terrain3D's format and add them as a
 ## texture asset on the edited scene's Terrain3D (same packing as Terrain3D's channel packer).
 
+const Pkg = preload("../../../src/paths.gd")
+
 const _HELP = \
 "Pack albedo+height and normal+roughness into Terrain3D textures and set them as texture asset --id.
 Usage: terrain3d texture --albedo=F --normal=F [--height=F] [--roughness=F] [flags]
@@ -48,19 +50,18 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (cmd/terrain3d/<cmd>/<cmd>.gd -> package root), loaded fresh so edits apply.
-func _src(file: String):
-	var pkg := ProjectSettings.localize_path(get_script().resource_path).get_base_dir().get_base_dir().get_base_dir().get_base_dir()
-	return ResourceLoader.load(pkg.path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
 
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	if not Engine.is_editor_hint(): # get_singleton logs an error outside the editor
+		ctx.append_error("terrain3d texture needs the editor (headless: no edited scene)")
+		return ExitCode.ERR
+	var ei = Engine.get_singleton(&"EditorInterface")
+	var T = Pkg.src("t3d.gd")
 	if not T.available():
 		ctx.append_error(T.NOT_AVAILABLE)
 		return ExitCode.ERR
-	var Pack = _src("texture_pack.gd")
-	var terrain: Node = T.find_terrain(T.level("node_paths.gd").scene_root())
+	var Pack = Pkg.src("texture_pack.gd")
+	var terrain: Node = T.find_terrain(Pkg.level("node_paths.gd").scene_root())
 	if terrain == null:
 		ctx.append_error("no Terrain3D in the edited scene")
 		return ExitCode.ERR
@@ -79,7 +80,7 @@ func _execute(ctx:Context):
 	if not res.ok:
 		ctx.append_error(res.message)
 		return ExitCode.ERR
-	var fs := EditorInterface.get_resource_filesystem()
+	var fs = ei.get_resource_filesystem()
 	fs.update_file(res.albedo_path)
 	fs.update_file(res.normal_path)
 	fs.reimport_files(PackedStringArray([res.albedo_path, res.normal_path]))
@@ -88,6 +89,6 @@ func _execute(ctx:Context):
 	if not a.ok:
 		ctx.append_error(a.message)
 		return ExitCode.ERR
-	EditorInterface.mark_scene_as_unsaved()
+	ei.mark_scene_as_unsaved()
 	ctx.append_output(a.message)
 	return ExitCode.OK

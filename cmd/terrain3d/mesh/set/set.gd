@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d mesh set`: change mesh asset properties.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Set Terrain3D mesh asset properties. Values convert to the property type. Saves the assets
 resource when it is its own file. Not undoable. With only ID, prints the editable properties.
@@ -18,19 +20,13 @@ static func get_self_command_data() -> Dictionary:
 	return _command_data({&"help": _HELP, &"positional_count": "min:1"})
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var M = _src("mesh_assets.gd")
+	var M = Pkg.src("mesh_assets.gd")
 	var asset = M.get_asset(terrain, int(positional_args[0]))
 	if asset == null or not positional_args[0].is_valid_int():
 		ctx.append_error("no mesh asset %s (terrain3d assets --meshes)" % positional_args[0])

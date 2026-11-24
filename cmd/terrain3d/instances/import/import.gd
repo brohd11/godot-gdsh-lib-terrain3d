@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances import`: add instances from JSON lines on stdin.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Add instances to the edited scene's Terrain3D from JSON lines on stdin (the export format; color
 optional). Instances outside existing regions are dropped by Terrain3D. Undoable; saves with the scene.
@@ -30,19 +32,13 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var I = _src("instances.gd")
+	var I = Pkg.src("instances.gd")
 	var errs := PackedStringArray()
 	var grouped: Dictionary = I.parse_json_lines(ctx.stdin, errs, mesh_flag)
 	for e in errs.slice(0, 10): ctx.append_error(e)

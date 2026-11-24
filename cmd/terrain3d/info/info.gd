@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d info`: summary of the Terrain3D nodes in the edited scene, and height sampling.
 
+const Pkg = preload("../../../src/paths.gd")
+
 const _HELP = \
 "Show Terrain3D nodes in the edited scene: data dir, spacing, regions, height range.
 Usage: terrain3d info [x,z ...]   also prints the terrain height at each world x,z"
@@ -18,17 +20,16 @@ static func get_self_command_data() -> Dictionary:
 
 
 
-## This package's src/ (cmd/terrain3d/<cmd>/<cmd>.gd -> package root), loaded fresh so edits apply.
-func _src(file: String):
-	var pkg := ProjectSettings.localize_path(get_script().resource_path).get_base_dir().get_base_dir().get_base_dir().get_base_dir()
-	return ResourceLoader.load(pkg.path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	if not Engine.is_editor_hint(): # get_singleton logs an error outside the editor
+		ctx.append_error("terrain3d info needs the editor (headless: no edited scene)")
+		return ExitCode.ERR
+	var ei = Engine.get_singleton(&"EditorInterface")
+	var T = Pkg.src("t3d.gd")
 	if not T.available():
 		ctx.append_error(T.NOT_AVAILABLE)
 		return ExitCode.ERR
-	var root := EditorInterface.get_edited_scene_root()
+	var root: Node = ei.get_edited_scene_root()
 	if root == null:
 		ctx.append_error("no scene open")
 		return ExitCode.ERR

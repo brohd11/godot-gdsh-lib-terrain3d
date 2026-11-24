@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d mesh add`: add a mesh asset from a scene or Mesh resource.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Add a Terrain3D mesh asset from a scene (.tscn/.glb, LODs as MeshInstance3D children) or a Mesh
 resource (wrapped in a generated scene, saved under --out). Prints the new id. Saves the assets
@@ -31,14 +33,8 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var terrain = _src("t3d.gd").edited_terrain()
+	var terrain = Pkg.src("t3d.gd").edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
@@ -51,7 +47,7 @@ func _execute(ctx:Context):
 	var opts := {props = props, out = out_flag, id = id_flag}
 	if name_flag != "":
 		opts.name = name_flag
-	var res: Dictionary = _src("mesh_assets.gd").add(terrain, positional_args[0], opts)
+	var res: Dictionary = Pkg.src("mesh_assets.gd").add(terrain, positional_args[0], opts)
 	if not res.ok:
 		ctx.append_error(res.message)
 		return ExitCode.ERR

@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances clear`: remove all instances of a mesh, in a region, an area, or everywhere.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Remove instances from the edited scene's Terrain3D. Undoable; saves with the scene.
 Usage: terrain3d instances clear [--mesh=ID] [--region=GX,GZ | --area=x0,z0,x1,z1] [--all]
@@ -34,14 +36,8 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
@@ -66,7 +62,7 @@ func _execute(ctx:Context):
 		regions = [r]
 	else:
 		regions = terrain.data.get_regions_active()
-	var res: Dictionary = _src("instances.gd").clear(terrain, regions, mesh_flag, rect)
+	var res: Dictionary = Pkg.src("instances.gd").clear(terrain, regions, mesh_flag, rect)
 	var saved: String = T.finish_edit(terrain, save_flag)
 	ctx.append_output(res.message + (("; " + saved) if saved != "" else ""))
 	return ExitCode.OK

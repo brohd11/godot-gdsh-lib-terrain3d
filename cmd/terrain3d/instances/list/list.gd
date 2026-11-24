@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances list`: instance counts per mesh asset and region.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Instance counts in the edited scene's Terrain3D, per mesh asset, with --regions per region too.
 Usage: terrain3d instances list [--regions]"
@@ -22,18 +24,12 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var terrain = _src("t3d.gd").edited_terrain()
+	var terrain = Pkg.src("t3d.gd").edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var counts: Dictionary = _src("instances.gd").counts(terrain)
+	var counts: Dictionary = Pkg.src("instances.gd").counts(terrain)
 	var ids := counts.keys()
 	ids.sort()
 	var total := 0

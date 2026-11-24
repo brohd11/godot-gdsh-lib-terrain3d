@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances from-mmi`: convert MultiMeshInstance3D nodes into Terrain3D instances.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Move the instances of MultiMeshInstance3D nodes (paths on stdin) into the edited scene's Terrain3D
 instancer, in world space with their colors. Each node's mesh is matched to a mesh asset (same Mesh,
@@ -36,21 +38,15 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var NP = T.level("node_paths.gd")
-	var M = _src("mesh_assets.gd")
-	var I = _src("instances.gd")
+	var NP = Pkg.level("node_paths.gd")
+	var M = Pkg.src("mesh_assets.gd")
+	var I = Pkg.src("instances.gd")
 	var errs := PackedStringArray()
 	var nodes: Array = NP.nodes_from_lines(ctx.stdin, errs)
 	var grouped := {}

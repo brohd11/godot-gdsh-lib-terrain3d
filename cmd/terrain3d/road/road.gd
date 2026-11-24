@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d road`: grade a strip along a polyline or Path3D (slope brush), then blend its shoulders (smooth brush).
 
+const Pkg = preload("../../../src/paths.gd")
+
 const _HELP = \
 "Carve a graded road/path into the edited scene's Terrain3D: a slope stroke of --width along the
 points (heights from x,y,z points or the Path3D; x,z points take the current terrain height, so
@@ -44,23 +46,17 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
-	var P = _src("points.gd")
-	var B = _src("brush.gd")
+	var P = Pkg.src("points.gd")
+	var B = Pkg.src("brush.gd")
 	var errs := PackedStringArray()
 	var step: float = step_flag if step_flag > 0.0 else width_flag * 0.5
-	var pts: PackedVector3Array = P.gather(positional_args, ctx.stdin, path_flag, T.level("node_paths.gd"), errs, step)
+	var pts: PackedVector3Array = P.gather(positional_args, ctx.stdin, path_flag, Pkg.level("node_paths.gd"), errs, step)
 	if not errs.is_empty():
 		for e in errs: ctx.append_error(e)
 		return ExitCode.ERR

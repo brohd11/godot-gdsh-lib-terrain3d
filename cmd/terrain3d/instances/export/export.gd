@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances export`: print instance transforms as JSON lines.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Print the edited scene's Terrain3D instances as JSON lines, one per instance (world transforms):
   {\"mesh\":ID,\"xform\":[bx.x,bx.y,bx.z, by.x,by.y,by.z, bz.x,bz.y,bz.z, ox,oy,oz],\"color\":[r,g,b,a]}
@@ -28,14 +30,8 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var terrain = _src("t3d.gd").edited_terrain()
+	var terrain = Pkg.src("t3d.gd").edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
 		return ExitCode.ERR
@@ -46,7 +42,7 @@ func _execute(ctx:Context):
 			ctx.append_error("--area wants x0,z0,x1,z1")
 			return ExitCode.ERR
 		rect = Rect2(Vector2(float(a[0]), float(a[1])), Vector2.ZERO).expand(Vector2(float(a[2]), float(a[3])))
-	var I = _src("instances.gd")
+	var I = Pkg.src("instances.gd")
 	var lines := PackedStringArray()
 	I.each(terrain, func(mid: int, t: Transform3D, c: Color):
 		if limit_flag <= 0 or lines.size() < limit_flag:

@@ -1,6 +1,8 @@
 extends "res://addons/_lib/gdsh/src/core/command_base.gd"
 ## `terrain3d instances add`: Terrain3D's instancer brush: scatter a mesh asset at points or along a stroke.
 
+const Pkg = preload("../../../../src/paths.gd")
+
 const _HELP = \
 "Scatter a mesh asset with Terrain3D's instancer brush, at points or along a stroke (sampled every
 size*0.2 m). Density comes from the asset (terrain3d mesh set ID density=) scaled by --strength.
@@ -58,14 +60,8 @@ func _get_flags() -> Dictionary:
 	return o.get_options()
 
 
-## This package's src/ (the dir beside cmd/), loaded fresh so edits apply.
-func _src(file: String):
-	var p := ProjectSettings.localize_path(get_script().resource_path)
-	return ResourceLoader.load(p.substr(0, p.rfind("/cmd/")).path_join("src").path_join(file), "", ResourceLoader.CACHE_MODE_IGNORE_DEEP)
-
-
 func _execute(ctx:Context):
-	var T = _src("t3d.gd")
+	var T = Pkg.src("t3d.gd")
 	var terrain = T.edited_terrain()
 	if terrain is String:
 		ctx.append_error(terrain)
@@ -75,7 +71,7 @@ func _execute(ctx:Context):
 		ctx.append_error("no mesh asset %s (terrain3d assets --meshes)" % positional_args[0])
 		return ExitCode.ERR
 	var errs := PackedStringArray()
-	var pts: PackedVector3Array = _src("points.gd").gather(positional_args.slice(1), ctx.stdin, path_flag, T.level("node_paths.gd"), errs, path_step_flag)
+	var pts: PackedVector3Array = Pkg.src("points.gd").gather(positional_args.slice(1), ctx.stdin, path_flag, Pkg.level("node_paths.gd"), errs, path_step_flag)
 	if not errs.is_empty() or pts.is_empty():
 		for e in errs: ctx.append_error(e)
 		if pts.is_empty(): ctx.append_error("no points (args, stdin, or --path)")
@@ -105,7 +101,7 @@ func _execute(ctx:Context):
 			ctx.append_error("--data must be a JSON object")
 			return ExitCode.ERR
 		opts.merge(extra, true)
-	var res: Dictionary = _src("instance_brush.gd").run(terrain, mid, pts, opts, OP, passes_flag, spacing_flag)
+	var res: Dictionary = Pkg.src("instance_brush.gd").run(terrain, mid, pts, opts, OP, passes_flag, spacing_flag)
 	if not res.ok:
 		ctx.append_error(res.message)
 		return ExitCode.ERR
