@@ -1,8 +1,9 @@
 export_root: "res://addons/_lib/gdsh_lib/terrain3d/_export_ignore/exports"
-plugin_folder: "Terrain3d{{version=res://addons/_lib/gdsh_lib/terrain3d}}"
+plugin_folder: "gdsh-lib-terrain3d{{version=res://addons/_lib/gdsh_lib/terrain3d}}"
 pre_script: ""
 post_script: ""
-external: []
+external:
+  - brohd11/godot-gdsh
 options:
   overwrite: true
   include_uid: true
@@ -31,5 +32,5 @@ options:
 exports:
   -
     source: "res://addons/_lib/gdsh_lib/terrain3d"
-    export_name: "terrain3d{{version=res://addons/_lib/gdsh_lib/terrain3d}}"
-    export_folder: addons/_lib/gdsh_lib/terrain3d
+    export_name: "gdsh-lib-terrain3d{{version=res://addons/_lib/gdsh_lib/terrain3d}}"
+    export_folder: ""

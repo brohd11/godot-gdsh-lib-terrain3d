@@ -5,7 +5,7 @@ extends RefCounted
 ## fresh, so edits apply. This file is <terrain3d>/src/paths.gd.
 
 ## path with dependency tag makes gdpackage require scan include level
-const _LEVEL_PATH = "res://addons/_lib/gdsh_lib/level/cmd/manifest.gd" #! gdp-dependency
+const _LEVEL_PATH = "../../level/cmd/manifest.gd" #! gdp-dependency
 
 
 static func package_dir() -> String:
