@@ -4,6 +4,8 @@ extends RefCounted
 ## auto-regions, slope filters and (for most tools) the same undo entries as painting in the editor.
 ## Brush values use the editor dock's units (strength %, size m, roughness %, ...); Terrain3DEditor
 ## converts them itself.
+## Those undo entries go through Terrain3D's editor plugin, which links itself to a terrain only
+## when the node is first selected; ensure_plugin() makes that link on demand.
 
 ## Terrain3DEditor.Tool
 const TOOL := {
@@ -74,6 +76,28 @@ static func make_data(opts: Dictionary):
 	return d
 
 
+## Links Terrain3D's editor plugin to terrain, which Terrain3DEditor needs to record undo. The
+## plugin links itself in its _edit(), on the node's first selection after the scene opens or
+## reloads, and never unlinks; so the node is edited once and the previous selection put back.
+## False outside the editor or with the Terrain3D plugin disabled.
+static func ensure_plugin(terrain: Node) -> bool:
+	if terrain.get_plugin() != null:
+		return true
+	if not Engine.is_editor_hint():
+		return false
+	var ei = Engine.get_singleton(&"EditorInterface")
+	if ei == null:
+		return false
+	var selection = ei.get_selection()
+	var previous: Array = selection.get_selected_nodes()
+	ei.edit_node(terrain)
+	selection.clear()
+	for n in previous:
+		if is_instance_valid(n):
+			selection.add_node(n)
+	return terrain.get_plugin() != null
+
+
 ## Fills NAN y with the terrain height (0 outside regions).
 static func ground_points(terrain: Node, points: PackedVector3Array) -> PackedVector3Array:
 	var out := points.duplicate()
@@ -102,6 +126,7 @@ static func stroke(terrain: Node, tool: int, op: int, points: PackedVector3Array
 	var size := float(data.get("size", 20.0))
 	var step := spacing if spacing > 0.0 else maxf(size * 0.2, 0.05)
 	passes = maxi(passes, 1)
+	var undoable := ensure_plugin(terrain) or tool in NO_NATIVE_UNDO
 	var ed = ClassDB.instantiate(&"Terrain3DEditor")
 	ed.set_terrain(terrain)
 	ed.set_tool(tool)
@@ -147,7 +172,10 @@ static func stroke(terrain: Node, tool: int, op: int, points: PackedVector3Array
 					ed.operate(p, 0.0)
 				samples += 1
 	ed.stop_operation()
-	return {ok = true, samples = samples, message = "%d samples x %d passes" % [samples, passes]}
+	var message := "%d samples x %d passes" % [samples, passes]
+	if not undoable:
+		message += " (not undoable: Terrain3D editor plugin inactive)"
+	return {ok = true, samples = samples, undo = undoable, message = message}
 
 
 ## Cumulative horizontal (xz) distance along points.
