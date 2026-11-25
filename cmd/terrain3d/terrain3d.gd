@@ -6,7 +6,7 @@ const _HELP = \
 "Terrain3D tools: sculpt, paint, roads, regions, instancer and MultiMesh conversion, mesh assets, heightmap import.
 Brush commands drive Terrain3D's own editor brushes; all terrain edits are undoable and save with the scene.
 Points are world x,z or x,y,z (args or stdin), or --path=<Path3D>.
-Ground provider for level tools: res://addons/_lib/gdsh_lib/terrain3d/src/terrain3d_ground.gd
+Ground for level tools: used automatically when level sits beside this package (--ground=auto).
 Usage: terrain3d <subcommand>"
 
 

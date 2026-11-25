@@ -53,8 +53,9 @@ terrain3d import HEIGHT_FILE [--sidecar=*_heightmap.json] [--scene=] [--data-dir
 - With Terrain3D `collision_mode` set to an editor mode (`FULL_EDITOR`/`DYNAMIC_EDITOR`), level tools land
   on the terrain through physics, with nothing else needed.
 - `src/terrain3d_ground.gd` is a provider that reads height data directly. It's exact, ignores props, and
-  works with collision off, headless, or on huge maps. Register it in ProjectSettings
-  `gdsh_lib/level/ground_providers`, or pass it per command with `--ground=`.
+  works with collision off, headless, or on huge maps. level's `--ground=auto` uses it with nothing to
+  register, whenever level is installed beside this package (`package.cfg` declares it under `[level]`).
+  ProjectSettings `gdsh_lib/level/ground_providers` and `--ground=` still override.
 
 ## Layout
 - `src/`: `brush.gd` (Terrain3DEditor driver), `snapshot.gd` (region undo), `points.gd`, `regions.gd`,

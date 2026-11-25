@@ -1,9 +1,9 @@
 @tool
 extends RefCounted
 ## gdsh_lib/level ground provider backed by Terrain3D's height data: exact, ignores props, and needs
-## no collision (works with collision off, headless, on huge maps). Register it for level tools:
-##   ProjectSettings gdsh_lib/level/ground_providers += "res://addons/_lib/gdsh_lib/terrain3d/src/terrain3d_ground.gd"
-## or pass it per command: level scatter ... --ground=res://addons/_lib/gdsh_lib/terrain3d/src/terrain3d_ground.gd
+## no collision (works with collision off, headless, on huge maps). level's --ground=auto uses it
+## whenever level sits beside this package: package.cfg declares it ([level] ground_provider).
+## The ProjectSettings gdsh_lib/level/ground_providers list and --ground=<path> still override.
 ## Contract (duck-typed, from gdsh_lib/level/src/ground.gd): covers, height_at, normal_at; _init(root).
 
 const NAME := "terrain3d"
